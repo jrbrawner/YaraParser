@@ -11,52 +11,58 @@ class YaraParser():
    rule_hash = ''
    compiles = ''
 
-   @classmethod
-   def __init__(cls, yara_text):
-      cls.parser.clear()
-      cls.parsed_rule = cls.parser.parse_string(yara_text)
-      cls.rule_text = plyara.utils.rebuild_yara_rule(cls.parsed_rule[0])
+   def __init__(self, yara_text, *, multiple=True):
+      self.parser.clear()
 
-   @classmethod
-   def get_rule_name(cls):
+      if multiple == True:
+         self.parsed_rule_list = list()
+         self.rule_text_list = list()
+         self.parsed_rule_list.append([x for x in self.parser.parse_string(yara_text)])
+      else:
+         self.parsed_rule = self.parser.parse_string(yara_text)
+         self.rule_text = plyara.utils.rebuild_yara_rule(self.parsed_rule[0])
+
+   
+   def get_rule_name(self):
       """Return rule name."""
-      return cls.parsed_rule[0]['rule_name']
+      return self.parsed_rule[0]['rule_name']
 
-   @classmethod
-   def get_rule_meta(cls):
+   
+   def get_rule_meta(self):
       """Return rule meta description."""
-      return cls.parsed_rule[0]['metadata']
+      return self.parsed_rule[0]['metadata']
 
-   @classmethod
-   def get_rule_strings_kvp(cls):
+   
+   def get_rule_strings_kvp(self):
       """Return rule strings as kvp."""
-      return cls.parsed_rule[0]['strings']
+      return self.parsed_rule[0]['strings']
 
-   @classmethod
-   def get_rule_strings(cls):
+   
+   def get_rule_strings(self):
       """Return rule raw strings."""
-      return cls.parsed_rule[0]['raw_strings']
+      return self.parsed_rule[0]['raw_strings']
 
-   @classmethod
-   def get_rule_conditions(cls):
+   
+   def get_rule_conditions(self):
       """Return rule conditions."""
-      return cls.parsed_rule[0]['raw_condition']
+      return self.parsed_rule[0]['raw_condition']
 
-   @classmethod
-   def get_rule_hash(cls):
-      if cls.rule_hash == '':
-         cls.rule_hash = plyara.utils.generate_logic_hash(cls.parsed_rule[0])
-         return cls.rule_hash
-      return cls.rule_hash
+   
+   def get_logic_hash(self):
+      """Return SHA-256 hash of rule strings and conditions."""
+      if self.rule_hash == '':
+         self.rule_hash = plyara.utils.generate_logic_hash(self.parsed_rule[0])
+         return self.rule_hash
+      return self.rule_hash
 
-   @classmethod
-   def try_compile(cls):
-      """ Takes raw Yara rule text and tries to compile the rule. Returns result of either true, or false. """
-      if cls.compiles == '':
+   
+   def try_compile(self):
+      """Attempts to compile provided rule. Returns True if rule compiles, returns False with the error message if the rule does not compile."""
+      if self.compiles == '':
          try:
-            result = yara.compile(source=cls.rule_text)
-            cls.compiles = 'True'
-            return cls.compiles
+            result = yara.compile(source=self.rule_text)
+            self.compiles = 'True'
+            return self.compiles
          except yara.YaraSyntaxError as e:
-            cls.compiles = 'False ' + str(e)
-            return cls.compiles
+            self.compiles = 'False ' + str(e)
+            return self.compiles
