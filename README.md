@@ -1,0 +1,1 @@
+Package I am working on to be used in parsing Yara rules into their individual components, and useful utilities for working with Yara rules.
