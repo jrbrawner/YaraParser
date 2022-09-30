@@ -1,49 +1,82 @@
 import pytest
+import re
 from YaraParser.YaraParser import YaraParser
 
 
 @pytest.fixture()
 def test_rule():
     test_rule = """
-    import "pe"
-    rule cert_blocklist_05e2e6a4cd09ea54d665b075fe22A256 {
-        meta:
-            author      = "ReversingLabs"
-            source      = "ReversingLabs"
-            status      = "RELEASED"
-            sharing     = "TLP:WHITE"
-            category    = "INFO"
-            description = "The digital certificate has leaked."
-        condition:
-            uint16(0) == 0x5A4D and
-            for any i in (0..pe.number_of_signatures): (
-                pe.signatures[i].subject contains "*.google.com" and
-                pe.signatures[i].serial == "05:e2:e6:a4:cd:09:ea:54:d6:65:b0:75:fe:22:a2:56" and
-                1308182400 <= pe.signatures[i].not_after
-            )
-    }
+rule Str_Win32_Winsock2_Library
+{
+    meta:
+        author = "@adricnet"
+        description = "Match Winsock 2 API library declaration"
+        method = "String match"
+        reference = "https://github.com/dfirnotes/rules"
+    strings:
+        $ws2_lib = "Ws2_32.dll" nocase
+        $wsock2_lib = "WSock32.dll" nocase
+    condition:
+        (any of ($ws2_lib, $wsock2_lib))
+}
     """
     
     return test_rule
 
-
 @pytest.fixture
 def single_parser(test_rule):
+    print(test_rule)
     return YaraParser(test_rule)
     
 
 def test_single_rule_name(single_parser):
-    assert single_parser.get_rule_name() == 'cert_blocklist_05e2e6a4cd09ea54d665b075fe22A256'
+    assert single_parser.get_rule_name() == 'Str_Win32_Winsock2_Library'
 
-def test_single_rule_meta(single_parser):
-    rule_meta = """
-           meta:
-            author      = "ReversingLabs"
-            source      = "ReversingLabs"
-            status      = "RELEASED"
-            sharing     = "TLP:WHITE"
-            category    = "INFO"
-            description = "The digital certificate has leaked."
+def test_single_rule_meta(single_parser, test_rule):
+    test_meta = """
+          meta:
+            author = "@adricnet"
+            description = "Match Winsock 2 API library declaration"
+            method = "String match"
+            reference = "https://github.com/dfirnotes/rules"
             """
-    rule_meta = rule_meta.strip()
-    assert single_parser.get_rule_meta() == rule_meta
+    test_meta = re.sub(r'\s', '', test_meta)
+    rule_meta = single_parser.get_rule_meta()
+    rule_meta = re.sub(r'\s', '', rule_meta)
+    
+    assert test_meta == rule_meta
+
+def test_single_rule_strings(single_parser):
+    test_strings = """
+    strings:
+        $ws2_lib = "Ws2_32.dll" nocase
+        $wsock2_lib = "WSock32.dll" nocase
+    """
+    test_strings = re.sub(r'\s', '', test_strings)
+    rule_strings = single_parser.get_rule_strings()
+    rule_strings = re.sub(r'\s', '', rule_strings)
+    
+    assert test_strings == rule_strings
+
+def test_single_rule_conditions(single_parser):
+    test_condition = """
+    condition:
+        (any of ($ws2_lib, $wsock2_lib))
+    """
+    test_condition = re.sub(r'\s', '', test_condition)
+    rule_condition = single_parser.get_rule_conditions()
+    rule_condition = re.sub(r'\s', '', rule_condition)
+
+    assert test_condition == rule_condition
+
+def test_single_rule_logic_hash(single_parser):
+    test_logic_hash = 'fd6a040fff14eeab7e1c367723b121632f746c7599887855ce91b6af04b96be5'
+    assert single_parser.get_logic_hash() == test_logic_hash
+
+def test_single_rule_compiles(single_parser):
+    assert single_parser.try_compile() == 'True'
+    
+    
+
+
+   

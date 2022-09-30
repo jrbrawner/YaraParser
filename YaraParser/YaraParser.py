@@ -2,14 +2,13 @@ import plyara
 import plyara.utils
 import yara
 
-
 class YaraParser:
 
     parser = plyara.Plyara()
 
     parsed_rule = {}
     rule_text = ""
-    rule_hash = ""
+    logic_hash = ""
     compiles = ""
 
     def __init__(self, yara_text, *multiple_rules):
@@ -33,10 +32,6 @@ class YaraParser:
         """Return rule meta description."""
         return self.parsed_rule[0]["raw_meta"]
 
-    def get_rule_strings_kvp(self):
-        """Return rule strings as kvp."""
-        return self.parsed_rule[0]["strings"]
-
     def get_rule_strings(self):
         """Return rule raw strings."""
         return self.parsed_rule[0]["raw_strings"]
@@ -45,12 +40,16 @@ class YaraParser:
         """Return rule conditions."""
         return self.parsed_rule[0]["raw_condition"]
 
+    def get_rule_strings_kvp(self):
+        """Return rule strings as kvp."""
+        return self.parsed_rule[0]["strings"]
+
     def get_logic_hash(self):
         """Return SHA-256 hash of rule strings and conditions."""
-        if self.rule_hash == "":
-            self.rule_hash = plyara.utils.generate_logic_hash(self.parsed_rule[0])
-            return self.rule_hash
-        return self.rule_hash
+        if self.logic_hash == "":
+            self.logic_hash = plyara.utils.generate_hash(self.parsed_rule[0])
+            return self.logic_hash
+        return self.logic_hash
 
     def try_compile(self):
         """Attempts to compile provided rule. Returns True if rule compiles, returns False with the error message if the rule does not compile."""
