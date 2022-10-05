@@ -2,7 +2,7 @@ import plyara
 import plyara.utils
 import yara
 
-class YaraParser:
+class SingleParser:
 
     parser = plyara.Plyara()
 
@@ -11,18 +11,10 @@ class YaraParser:
     logic_hash = ""
     compiles = ""
 
-    def __init__(self, yara_text, *multiple_rules):
+    def __init__(self, yara_text):
         self.parser.clear()
-
-        if multiple_rules == True:
-            self.parsed_rule_list = list()
-            self.rule_text_list = list()
-            self.parsed_rule_list.append(
-                [x for x in self.parser.parse_string(yara_text)]
-            )
-        else:
-            self.parsed_rule = self.parser.parse_string(yara_text)
-            self.rule_text = plyara.utils.rebuild_yara_rule(self.parsed_rule[0])
+        self.parsed_rule = self.parser.parse_string(yara_text)
+        self.rule_text = plyara.utils.rebuild_yara_rule(self.parsed_rule[0])
 
     def get_rule_name(self):
         """Return rule name."""
@@ -61,3 +53,5 @@ class YaraParser:
             except yara.YaraSyntaxError as e:
                 self.compiles = "False " + str(e)
                 return self.compiles
+
+    

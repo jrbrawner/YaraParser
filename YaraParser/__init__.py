@@ -1,1 +1,1 @@
-from YaraParser.YaraParser import YaraParser
+from YaraParser.SingleParser import SingleParser

@@ -1,11 +1,11 @@
 import pytest
 import re
-from YaraParser.YaraParser import YaraParser
+from YaraParser.SingleParser import SingleParser
 
 
 @pytest.fixture()
-def test_rule():
-    test_rule = """
+def test_rule_single():
+    test_rule_single = """
 rule Str_Win32_Winsock2_Library
 {
     meta:
@@ -21,18 +21,17 @@ rule Str_Win32_Winsock2_Library
 }
     """
     
-    return test_rule
+    return test_rule_single
 
 @pytest.fixture
-def single_parser(test_rule):
-    print(test_rule)
-    return YaraParser(test_rule)
+def single_parser(test_rule_single):
+    return SingleParser(test_rule_single)
     
 
 def test_single_rule_name(single_parser):
     assert single_parser.get_rule_name() == 'Str_Win32_Winsock2_Library'
 
-def test_single_rule_meta(single_parser, test_rule):
+def test_single_rule_meta(single_parser):
     test_meta = """
           meta:
             author = "@adricnet"
@@ -75,6 +74,16 @@ def test_single_rule_logic_hash(single_parser):
 
 def test_single_rule_compiles(single_parser):
     assert single_parser.try_compile() == 'True'
+
+def test_single_rule_strings_kvp(single_parser):
+    test_strings = """
+    [{'name': '$ws2_lib', 'value': 'Ws2_32.dll', 'type': 'text', 'modifiers': ['nocase']}, {'name': '$wsock2_lib', 'value': 'WSock32.dll', 'type': 'text', 'modifiers': ['nocase']}]
+    """
+    test_strings = re.sub(r'\s', '', test_strings)
+    rule_strings = str(single_parser.get_rule_strings_kvp())
+    rule_strings = re.sub(r'\s', '', rule_strings)
+
+    assert rule_strings == test_strings
     
     
 
