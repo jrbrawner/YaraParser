@@ -2,6 +2,7 @@ import plyara
 import plyara.utils
 import yara
 
+
 class SingleParser:
 
     parser = plyara.Plyara()
@@ -19,13 +20,13 @@ class SingleParser:
     def get_rule_dict(self):
         """Returns a dictionary with all relevant data from rule."""
         data = {}
-        data['rule_name'] = self.parsed_rule[0]['rule_name']
-        data['rule_meta'] = self.parsed_rule[0]['raw_meta']
-        data["rule_strings"] = self.parsed_rule[0]['raw_strings']
-        data['rule_conditions'] = self.parsed_rule[0]['raw_condition']
-        data['rule_logic_hash'] = self.get_logic_hash()
-        data['raw_text'] = self.rule_text
-        data['compiles'] = self.get_compile_status()
+        data["rule_name"] = self.parsed_rule[0]["rule_name"]
+        data["rule_meta"] = self.parsed_rule[0]["raw_meta"]
+        data["rule_strings"] = self.parsed_rule[0]["raw_strings"]
+        data["rule_conditions"] = self.parsed_rule[0]["raw_condition"]
+        data["rule_logic_hash"] = self.get_logic_hash()
+        data["raw_text"] = self.rule_text
+        data["compiles"] = self.get_compile_status()
 
         return data
 
@@ -66,5 +67,3 @@ class SingleParser:
             except yara.YaraSyntaxError as e:
                 self.compiles = "False " + str(e)
                 return self.compiles
-
-    
