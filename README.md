@@ -29,7 +29,7 @@ rule Big_Numbers0
 parser = SingleParser(test)
 
 parser.get_rule_name()
-parser.get_rule_conditions()
+parser.get_rule_strings()
 parser.rule_text
 ```
 ```
