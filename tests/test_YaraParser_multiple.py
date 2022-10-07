@@ -76,9 +76,14 @@ def multi_parser(test_rule_multi):
     return MultiParser(test_rule_multi)
 
 def test_multi_rule_name(multi_parser):
-    obj = multi_parser.get_rules_dict()
+	multi_parser.get_rules_dict()
+	for k,v in multi_parser.rules_dict.items():
+		pass
+		
 
-    for k,v in obj.items():
-        print(k,v)
+def test_rule_name_list(multi_parser):
+	rule_name_list = multi_parser.get_rule_name_list()
+
+
 
 

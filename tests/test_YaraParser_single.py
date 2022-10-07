@@ -73,7 +73,7 @@ def test_single_rule_logic_hash(single_parser):
     assert single_parser.get_logic_hash() == test_logic_hash
 
 def test_single_rule_compiles(single_parser):
-    assert single_parser.try_compile() == 'True'
+    assert single_parser.get_compile_status() == 'True'
 
 def test_single_rule_strings_kvp(single_parser):
     test_strings = """
@@ -84,6 +84,12 @@ def test_single_rule_strings_kvp(single_parser):
     rule_strings = re.sub(r'\s', '', rule_strings)
 
     assert rule_strings == test_strings
+
+
+
+
+
+    
     
     
 
