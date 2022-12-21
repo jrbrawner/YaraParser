@@ -5,7 +5,7 @@ import yara
 
 class MultiParser:
 
-    parser = plyara.Plyara()
+    parser = plyara.Plyara(meta_as_kv=True)
     parsed_rules = {}
     rules_dict = {}
     rule_name_list = list()
@@ -30,6 +30,7 @@ class MultiParser:
             data = {}
             data["rule_name"] = i["rule_name"]
             data["rule_meta"] = i["raw_meta"]
+            data["rule_meta_kvp"] = i["metadata"]
             data["rule_strings"] = i["raw_strings"]
             data["rule_conditions"] = i["raw_condition"]
             data["rule_logic_hash"] = plyara.utils.generate_hash(i)
@@ -64,3 +65,28 @@ class MultiParser:
         except yara.YaraSyntaxError as e:
             compiles = "False " + str(e)
             return compiles
+
+    def get_meta_fields(
+        self,
+        rule_meta_kvp: str,
+        meta_keyword_list: list = None,
+        meta_keyword: str = None,
+    ):
+        """Takes parsed rule meta field from a Yara rule, and tries to return the value of a specified meta field if it exists.
+        meta_keyword_list: Optional list parameter that can be used to obtain multiple keyword values at once.
+        meta_keyword: Optional str parameter that can be used to obtain one keyword value at a time.
+        """
+        if meta_keyword_list is not None:
+            keyword_value_list = list()
+            for keyword in meta_keyword_list:
+                for meta_kvp in rule_meta_kvp:
+                    value = meta_kvp.get(keyword)
+                    if value is not None:
+                        keyword_value_list.append({f"{keyword}": f"{value}"})
+            return keyword_value_list
+        elif meta_keyword is not None:
+            for meta_kvp in rule_meta_kvp:
+                value = meta_kvp.get(meta_keyword)
+                if value is not None:
+                    return value
+            return None

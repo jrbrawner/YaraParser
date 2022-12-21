@@ -10,12 +10,13 @@ def read(fname):
 
 setup(
     name = "YaraParser",
-    version = "0.0.2",
+    version = "0.0.3",
     author = "Joshua Brawner",
     author_email = "jrbbrawner@gmail.com",
     description = ("Parse and easily work with Yara rules."),
     license = "Apache Software License",
     keywords = "yara parser",
+    long_description_content_type = 'text/markdown',
     url = "https://www.github.com/jrbrawner/YaraParser",
     packages=['YaraParser'],
     long_description=read('README.md'),

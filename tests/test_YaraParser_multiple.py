@@ -1,4 +1,3 @@
-from cgi import test
 from email.mime import multipart
 import pytest
 import re
@@ -75,15 +74,14 @@ rule ATM_Malware_XFS_ALICE {
 def multi_parser(test_rule_multi):
     return MultiParser(test_rule_multi)
 
-def test_multi_rule_name(multi_parser):
+def test_multi_rule_name(multi_parser: MultiParser):
 	multi_parser.get_rules_dict()
 	for k,v in multi_parser.rules_dict.items():
-		pass
-		
+		keyword_list = ['author', 'date']
+		result = multi_parser.get_meta_fields(v['rule_meta_kvp'], meta_keyword_list=keyword_list)
+		print(result)
 
 def test_rule_name_list(multi_parser):
 	rule_name_list = multi_parser.get_rule_name_list()
-
-
-
+	pass
 
