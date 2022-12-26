@@ -1,34 +1,51 @@
 import plyara
 import plyara.utils
 import yara
+import re
 
 
 class SingleParser:
 
-    parser = plyara.Plyara()
+    parser = plyara.Plyara(meta_as_kv=True)
 
     parsed_rule = {}
-    rule_text = ""
+    raw_text = ""
     logic_hash = ""
     compiles = ""
+    strip_whitespace = False
 
-    def __init__(self, yara_text):
+    def __init__(self, yara_text, strip_whitespace=False):
         self.parser.clear()
         self.parsed_rule = self.parser.parse_string(yara_text)
         self.rule_text = plyara.utils.rebuild_yara_rule(self.parsed_rule[0])
+        self.strip_whitespace = strip_whitespace
 
     def get_rule_dict(self):
         """Returns a dictionary with all relevant data from rule."""
-        data = {}
-        data["rule_name"] = self.parsed_rule[0]["rule_name"]
-        data["rule_meta"] = self.parsed_rule[0]["raw_meta"]
-        data["rule_strings"] = self.parsed_rule[0]["raw_strings"]
-        data["rule_conditions"] = self.parsed_rule[0]["raw_condition"]
-        data["rule_logic_hash"] = self.get_logic_hash()
-        data["raw_text"] = self.rule_text
-        data["compiles"] = self.get_compile_status()
+        if self.strip_whitespace == False:
+            data = {}
+            data["rule_name"] = self.parsed_rule[0]["rule_name"]
+            data["rule_meta"] = self.parsed_rule[0]["raw_meta"]
+            data["rule_strings"] = self.parsed_rule[0]["raw_strings"]
+            data["rule_conditions"] = self.parsed_rule[0]["raw_condition"]
+            data["rule_logic_hash"] = self.get_logic_hash()
+            data["raw_text"] = self.rule_text
+            data["compiles"] = self.get_compile_status().strip()
 
-        return data
+            return data
+        if self.strip_whitespace == True:
+            data = {}
+            data["rule_name"] = re.sub(r"\s", "", self.parsed_rule[0]["rule_name"])
+            data["rule_meta"] = re.sub(r"\s", "", self.parsed_rule[0]["raw_meta"])
+            data["rule_strings"] = re.sub(r"\s", "", self.parsed_rule[0]["raw_strings"])
+            data["rule_conditions"] = re.sub(
+                r"\s", "", self.parsed_rule[0]["raw_condition"]
+            )
+            data["rule_logic_hash"] = self.get_logic_hash()
+            data["raw_text"] = self.rule_text
+            data["compiles"] = self.get_compile_status().strip()
+
+            return data
 
     def get_rule_name(self):
         """Return rule name."""
@@ -67,3 +84,10 @@ class SingleParser:
             except yara.YaraSyntaxError as e:
                 self.compiles = "False " + str(e)
                 return self.compiles
+
+    def get_meta_field(self, keyword: str):
+        for meta_kvp in self.parsed_rule[0]["metadata"]:
+            value = meta_kvp.get(keyword)
+            if value is not None:
+                return value
+        return None

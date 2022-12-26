@@ -72,7 +72,7 @@ rule ATM_Malware_XFS_ALICE {
 
 @pytest.fixture()
 def multi_parser(test_rule_multi):
-    return MultiParser(test_rule_multi)
+    return MultiParser(test_rule_multi, strip_whitespace=True)
 
 def test_multi_rule_name(multi_parser: MultiParser):
 	multi_parser.get_rules_dict()
@@ -84,4 +84,10 @@ def test_multi_rule_name(multi_parser: MultiParser):
 def test_rule_name_list(multi_parser):
 	rule_name_list = multi_parser.get_rule_name_list()
 	pass
+
+def test_idk(multi_parser: MultiParser):
+	rules = multi_parser.get_rules_dict()
+	for k,v in rules.items():
+		print(v)
+	
 

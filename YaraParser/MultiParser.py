@@ -1,6 +1,7 @@
 import plyara
 import plyara.utils
 import yara
+import re
 
 
 class MultiParser:
@@ -9,10 +10,12 @@ class MultiParser:
     parsed_rules = {}
     rules_dict = {}
     rule_name_list = list()
+    strip_whitespace = False
 
-    def __init__(self, yara_text):
+    def __init__(self, yara_text, strip_whitespace=False):
         self.parser.clear()
         self.parsed_rules = self.parser.parse_string(yara_text)
+        self.strip_whitespace = strip_whitespace
 
     def get_rules_dict(self, rule_name_as_key=False):
         """
@@ -23,27 +26,50 @@ class MultiParser:
         if len(self.rules_dict) != 0:
             return self.rules_dict
 
-        counter = 1
-        holder = {}
+        if self.strip_whitespace == False:
+            counter = 1
+            holder = {}
 
-        for i in self.parsed_rules:
-            data = {}
-            data["rule_name"] = i["rule_name"]
-            data["rule_meta"] = i["raw_meta"]
-            data["rule_meta_kvp"] = i["metadata"]
-            data["rule_strings"] = i["raw_strings"]
-            data["rule_conditions"] = i["raw_condition"]
-            data["rule_logic_hash"] = plyara.utils.generate_hash(i)
-            data["raw_text"] = plyara.utils.rebuild_yara_rule(i)
-            data["compiles"] = self.get_compile_status(data["raw_text"])
+            for i in self.parsed_rules:
+                data = {}
+                data["rule_name"] = i["rule_name"]
+                data["rule_meta"] = i["raw_meta"]
+                data["rule_meta_kvp"] = i["metadata"]
+                data["rule_strings"] = i["raw_strings"]
+                data["rule_conditions"] = i["raw_condition"]
+                data["rule_logic_hash"] = plyara.utils.generate_hash(i)
+                data["raw_text"] = plyara.utils.rebuild_yara_rule(i)
+                data["compiles"] = self.get_compile_status(data["raw_text"]).strip()
 
-            if rule_name_as_key == True:
-                holder[data["rule_name"]] = data
-            else:
-                holder[counter] = data
-                counter += 1
-        self.rules_dict = holder
-        return self.rules_dict
+                if rule_name_as_key == True:
+                    holder[data["rule_name"]] = data
+                else:
+                    holder[counter] = data
+                    counter += 1
+            self.rules_dict = holder
+            return self.rules_dict
+        if self.strip_whitespace == True:
+            counter = 1
+            holder = {}
+
+            for i in self.parsed_rules:
+                data = {}
+                data["rule_name"] = i["rule_name"]
+                data["rule_meta"] = re.sub(r"\s", "", i["raw_meta"])
+                data["rule_meta_kvp"] = i["metadata"]
+                data["rule_strings"] = re.sub(r"\s", "", i["raw_strings"])
+                data["rule_conditions"] = re.sub(r"\s", "", i["raw_condition"])
+                data["rule_logic_hash"] = plyara.utils.generate_hash(i)
+                data["raw_text"] = plyara.utils.rebuild_yara_rule(i)
+                data["compiles"] = self.get_compile_status(data["raw_text"]).strip()
+
+                if rule_name_as_key == True:
+                    holder[data["rule_name"]] = data
+                else:
+                    holder[counter] = data
+                    counter += 1
+            self.rules_dict = holder
+            return self.rules_dict
 
     def get_rule_name_list(self):
         """Get a list of rule names, in order of rules parsed."""
@@ -82,8 +108,9 @@ class MultiParser:
                 for meta_kvp in rule_meta_kvp:
                     value = meta_kvp.get(keyword)
                     if value is not None:
-                        keyword_value_list.append({f"{keyword}": f"{value}"})
+                        keyword_value_list.append({keyword: value})
             return keyword_value_list
+
         elif meta_keyword is not None:
             for meta_kvp in rule_meta_kvp:
                 value = meta_kvp.get(meta_keyword)

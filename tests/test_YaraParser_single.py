@@ -25,7 +25,7 @@ rule Str_Win32_Winsock2_Library
 
 @pytest.fixture
 def single_parser(test_rule_single):
-    return SingleParser(test_rule_single)
+    return SingleParser(test_rule_single, strip_whitespace=True)
     
 
 def test_single_rule_name(single_parser):
@@ -85,6 +85,10 @@ def test_single_rule_strings_kvp(single_parser):
 
     assert rule_strings == test_strings
 
+def test_single_rule_meta_field(single_parser):
+    single_parser : SingleParser
+    value = single_parser.get_meta_field('author')
+    assert value == '@adricnet'
 
 
 
